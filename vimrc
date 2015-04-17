@@ -21,6 +21,7 @@ Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-repeat'
 Plugin 'tpope/vim-unimpaired'
 Plugin 'godlygeek/tabular'
+Plugin 'editorconfig/editorconfig-vim'
 " File Manager
 Plugin 'kien/ctrlp.vim'
 Plugin 'tacahiroy/ctrlp-funky'
@@ -35,6 +36,7 @@ Plugin 'majutsushi/tagbar'
 Plugin 'bling/vim-airline'
 Plugin 'matchit.zip'
 " Completion
+Plugin 'Valloric/YouCompleteMe'
 Plugin 'SirVer/ultisnips'
 Plugin 'honza/vim-snippets'
 " Syntax Highlight
@@ -42,7 +44,9 @@ Plugin 'scrooloose/syntastic'
 Plugin 'tpope/vim-markdown'
 Plugin 'tpope/vim-haml'
 Plugin 'tpope/vim-rails'
-"Plugin 'groenewege/vim-less'
+Plugin 'Blackrush/vim-gocode'
+Plugin 'digitaltoad/vim-jade'
+Plugin 'wavded/vim-stylus'
 Plugin 'pangloss/vim-javascript'
 Plugin 'kchmck/vim-coffee-script'
 Plugin 'elzr/vim-json'
@@ -174,21 +178,15 @@ set noswapfile
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Text, tab and indent related
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+set nowrap                      " Do not wrap long lines
 set autoindent                  " Indent at the same level of the previous line
+set shiftwidth=4                " Use indents of 4 spaces
 set expandtab                   " Tabs are spaces, not tabs
-
-set shiftwidth=2                " Use indents of 4 spaces
-set tabstop=2                   " An indentation every four columns
-set softtabstop=2               " Let backspace delete indent
-
-" Prevents inserting two spaces after punctuation on a join (J)
-set nojoinspaces
-
-" Linebreak on 500 characters
-set lbr
-set tw=500
-
-set wrap                        " Do not wrap long lines
+set tabstop=4                   " An indentation every four columns
+set softtabstop=4               " Let backspace delete indent
+set nojoinspaces                " Prevents inserting two spaces after punctuation on a join (J)
+set splitright                  " Puts new vsplit windows to the right of the current
+set splitbelow                  " Puts new split windows to the bottom of the current
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Moving around, tabs, windows and buffers
@@ -204,6 +202,12 @@ map <c-space> ?
 
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
+
+" Strip away trailing whitespaces on write
+autocmd BufWritePre <buffer> call StripTrailingWhitespace()
+
+" Set known filetypes
+autocmd BufNewFile,BufReadPost *.styl set filetype=stylus
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Plugins settings
@@ -237,6 +241,13 @@ if isdirectory(expand("~/.vim/bundle/vim-fugitive/"))
   " Mnemonic _interactive
   nnoremap <silent> <leader>gi :Git add -p %<CR>
   nnoremap <silent> <leader>gg :SignifyToggle<CR>
+endif
+
+""""""""""""""""""""""""""""""
+" => editorconfig-vim
+""""""""""""""""""""""""""""""
+if isdirectory(expand("~/.vim/bundle/editorconfig-vim/"))
+  let g:EditorConfig_exclude_patterns=['fugitive://.*']
 endif
 
 """"""""""""""""""""""""""""""
@@ -346,17 +357,32 @@ if isdirectory(expand("~/.vim/bundle/nerdtree/"))
 endif
 
 """"""""""""""""""""""""""""""
-" => nerdtree
+" => ultisnips
 """"""""""""""""""""""""""""""
-if isdirectory(expand("~/.vim/bundle/ultisnips/"))
-  let g:UltiSnipsListSnippets = '§'
-  let g:UltiSnipsExpandTrigger = '<tab>'
-  let g:UltiSnipsJumpForwardTrigger = '<tab>'
-  let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
+if isdirectory(expand("~/.vim/bundle/YouCompleteMe/"))
+
+  let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
+  let g:ycm_key_list_select_completion=[]
+  let g:ycm_key_list_previous_completion=[]
+
+  " remap Ultisnips for compatibility for YCM
+  let g:UltiSnipsExpandTrigger='<tab>'
+  let g:UltiSnipsJumpForwardTrigger='<tab>'
+  let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
+
+  " Enable omni completion.
+  autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+  autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+  autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+  autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+  autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
+  autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
+
 endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" => Misc
+" => unimpaired
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 if isdirectory(expand("~/.vim/bundle/vim-unimpaired/"))
   " Bubble single lines
@@ -404,5 +430,3 @@ function! StripTrailingWhitespace()
   let @/=_s
   call cursor(l, c)
 endfunction
-
-autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl,sql,vim autocmd BufWritePre <buffer> call StripTrailingWhitespace()
